@@ -12,7 +12,7 @@ export declare function segmentEnabled(s: SegmentSettings, kind: {
     group: boolean;
     adminPrivate: boolean;
 }): boolean;
-/** 合并发送时，普通段落用空格连接；围栏代码块保留换行及边界。 */
+/** 合并发送时，普通文字移除换行，英文单词之间保留必要空格；围栏代码块保留换行及边界。 */
 export declare function joinReply(text: string): string;
 /** 把一次回复拆成几段。 */
 export declare function splitReply(text: string, maxSegments: number): string[];

@@ -21,11 +21,11 @@ export function segmentEnabled(s: SegmentSettings, kind: { group: boolean; admin
   return kind.group ? s.group : kind.adminPrivate ? s.adminPrivate : s.private
 }
 
-/** 合并发送时，普通段落用空格连接；围栏代码块保留换行及边界。 */
+/** 合并发送时，普通文字移除换行，英文单词之间保留必要空格；围栏代码块保留换行及边界。 */
 export function joinReply(text: string): string {
   const parts = splitReply(text, Number.MAX_SAFE_INTEGER)
   return parts.reduce((out, part, i) => out + (i === 0 ? '' :
-    part.startsWith('```') || parts[i - 1]!.startsWith('```') ? '\n' : ' ') + part, '')
+    part.startsWith('```') || parts[i - 1]!.startsWith('```') ? '\n' : /[A-Za-z0-9]$/.test(parts[i - 1]!) && /^[A-Za-z0-9]/.test(part) ? ' ' : '') + part, '')
 }
 
 /** 把一次回复拆成几段。 */

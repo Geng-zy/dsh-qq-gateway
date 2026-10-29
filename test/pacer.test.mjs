@@ -133,8 +133,8 @@ test('配置默认最长等待5/8/8秒用于实际分类计算，显式设置仍
 
  test('合并发送：普通段落不换行，保留代码内容及围栏边界', async () => {
   const { joinReply } = await import('../lib/segment.js')
-  assert.equal(joinReply('嗯\r\n\r\n  好呀  \n'), '嗯 好呀')
+  assert.equal(joinReply('嗯\r\n\r\n  好呀  \n'), '嗯好呀')
   assert.equal(joinReply('hello\nworld'), 'hello world')
-  assert.equal(joinReply('看这个\n```js\nconst a = 1\n\nconst b = 2\n```\n懂了吗\n试试'), '看这个\n```js\nconst a = 1\n\nconst b = 2\n```\n懂了吗 试试')
+  assert.equal(joinReply('看这个\n```js\nconst a = 1\n\nconst b = 2\n```\n懂了吗\n试试'), '看这个\n```js\nconst a = 1\n\nconst b = 2\n```\n懂了吗试试')
   assert.equal(joinReply('```\na\n  b'), '```\na\n  b')
 })

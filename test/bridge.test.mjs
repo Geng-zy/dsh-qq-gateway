@@ -292,7 +292,7 @@ test('提示：时间、群名、管理员身份写进 <system_reminder>', async
   const h = harness({ reminder: { datetime: true, timezone: 'Asia/Shanghai', groupName: true, markAdmin: true } }, memberInfo)
   await h.groupMsg(Number(ADMIN), 555, [at(BOT), text('几点了')])
   const t = h.followups[0].text
-  assert.match(t, /<system_reminder>Sender role: admin \(QQ 42\)\nGroup name: 测试群\nCurrent datetime: \d{4}-\d{2}-\d{2} \d{2}:\d{2} \(.+\), Weekday: \w+day<\/system_reminder>/)
+  assert.match(t, /<system_reminder>Sender role: admin \(QQ 42\)\nGroup name: 测试群\nCurrent datetime: \d{4}-\d{2}-\d{2} \d{2}:\d{2} \(.+\), Weekday: \w+day\n日常聊天/)
 })
 
 test('提示：群里被 @ 或引用叫醒时告诉她「这条是在叫你」和她的 QQ 号、群名片；私聊、关掉时不写', async () => {
@@ -391,10 +391,10 @@ test('语音：关闭时写 [语音]；本机命令方式转成文字', async ()
   const api = { ...memberInfo, get_record: () => ({ base64: Buffer.from('RIFFfake').toString('base64') }) }
   const h = harness({}, api)
   await h.privateMsg(8, [{ type: 'record', data: { file: 'a.amr' } }])
-  assert.equal(h.followups[0].text, '[语音]')
+  assert.equal(h.followups[0].text.replace(/<system_reminder>[\s\S]*?<\/system_reminder>\n?/g, '').trim(), '[语音]')
   h.set({ stt: { mode: 'command', command: script + ' {file}', apiUrl: '', apiKey: '', model: '' } })
   await h.privateMsg(8, [{ type: 'record', data: { file: 'b.amr' } }])
-  assert.equal(h.followups[1].text, '[语音] 今天吃什么')
+  assert.equal(h.followups[1].text.replace(/<system_reminder>[\s\S]*?<\/system_reminder>\n?/g, '').trim(), '[语音] 今天吃什么')
 })
 
 test('snowluma/prompt：其他插件能往内容里加东西，能拿到会话信息，第一轮标成新会话', async () => {
@@ -417,7 +417,7 @@ test('snowluma/prompt：其他插件能往内容里加东西，能拿到会话�
 test('snowluma/prompt 监听器出错时照常交给模型', async () => {
   const h = harness({}, memberInfo, { prompt: () => { throw new Error('坏了') } })
   await h.privateMsg(8, [text('你好')])
-  assert.equal(h.followups[0].text, '你好')
+  assert.equal(h.followups[0].text.replace(/<system_reminder>[\s\S]*?<\/system_reminder>\n?/g, '').trim(), '你好')
 })
 
 test('会话信息：建会话前登记，群聊有群号，群里每人单独会话时有 QQ 号', async () => {
@@ -463,11 +463,11 @@ test('分段发送：主人私聊按行拆成几条、按顺序发，每条都�
   await h.privateMsg(8, [text('你好')])
   h.turn(String(h.created[1].sessionId), '你好呀\n我是大肥鱼')
   await new Promise(r => setTimeout(r, 30))
-  assert.equal(h.sent.at(-1).text, '你好呀 我是大肥鱼')
+  assert.equal(h.sent.at(-1).text, '你好呀我是大肥鱼')
   await h.groupMsg(8, 555, [at(BOT), text('你好')])
   h.turn(String(h.created[2].sessionId), '你好呀\n\n大家好')
   await new Promise(r => setTimeout(r, 30))
-  assert.equal(h.sent.at(-1).text, '你好呀 大家好')
+  assert.equal(h.sent.at(-1).text, '你好呀大家好')
 })
 
 test('会话已经在 dsh 里开着（比如网页先接上了）：直接用它，不新建也不恢复', async () => {
@@ -519,11 +519,11 @@ test('视频：没有 ffmpeg 时只写 [视频]；有 ffmpeg 时附截图和一�
   const attachments = { admitPromptContent: async parts => parts }
   const h = harness({ imageToModel: true }, memberInfo, { attachments })
   await h.privateMsg(8, [{ type: 'video', data: { file: video } }])
-  assert.equal(h.followups[0].text, '[视频]')
+  assert.equal(h.followups[0].text.replace(/<system_reminder>[\s\S]*?<\/system_reminder>\n?/g, '').trim(), '[视频]')
   assert.equal(h.followups[0].images, 0)
   h.set({ imageToModel: true, video: { enabled: true, maxFrames: 4, secondsPerFrame: 5, maxEdge: 1024, maxMB: 100, maxMinutes: 10, timeoutSeconds: 30, ffmpegPath: bin } })
   await h.privateMsg(8, [text('看这个'), { type: 'video', data: { file: video } }])
-  assert.equal(h.followups[1].text, '看这个 [视频]\n[视频，时长 0:10，以下是从中截取的 2 张画面]')
+  assert.equal(h.followups[1].text.replace(/<system_reminder>[\s\S]*?<\/system_reminder>\n?/g, '').trim(), '看这个 [视频]\n[视频，时长 0:10，以下是从中截取的 2 张画面]')
   assert.equal(h.followups[1].images, 2)
 })
 
@@ -531,7 +531,7 @@ test('视频：关掉「图片交给模型」时不截图', async () => {
   const { bin, video } = fakeFfmpeg(10)
   const h = harness({ imageToModel: false, video: { enabled: true, maxFrames: 4, secondsPerFrame: 5, maxEdge: 1024, maxMB: 100, maxMinutes: 10, timeoutSeconds: 30, ffmpegPath: bin } }, memberInfo, { attachments: { admitPromptContent: async p => p } })
   await h.privateMsg(8, [{ type: 'video', data: { file: video } }])
-  assert.equal(h.followups[0].text, '[视频]')
+  assert.equal(h.followups[0].text.replace(/<system_reminder>[\s\S]*?<\/system_reminder>\n?/g, '').trim(), '[视频]')
   assert.equal(h.followups[0].images, 0)
 })
 
@@ -893,4 +893,19 @@ test('语音被明确拒绝回退一次原文字并保留群引用/@；超时不
     if (!uncertain) { assertReplyTarget(h.sent[0].message, 9, 100); assert.match(h.sent[0].text, /在的/) }
     await h.bridge.dispose()
   }
+})
+
+test('自然表达提示按会话类型及分段开关隔离', async () => {
+  const h = harness({ segment: { adminPrivate: true, private: false, group: false, maxSegments: 3, maxSecondsPerSegment: 3 } }, memberInfo)
+  await h.privateMsg(Number(ADMIN), [text('你好')])
+  assert.doesNotMatch(h.followups.at(-1).text, /日常聊天请用正常标点/)
+  await h.privateMsg(8, [text('你好')])
+  assert.match(h.followups.at(-1).text, /日常聊天请用正常标点/)
+  await h.groupMsg(Number(ADMIN), 555, [at(BOT), text('你好')])
+  assert.match(h.followups.at(-1).text, /日常聊天请用正常标点/)
+  h.set({ segment: { adminPrivate: true, private: true, group: true, maxSegments: 3, maxSecondsPerSegment: 3 } })
+  await h.groupMsg(8, 555, [at(BOT), text('你好')])
+  assert.doesNotMatch(h.followups.at(-1).text, /日常聊天请用正常标点/)
+  await h.privateMsg(8, [text('你好')])
+  assert.doesNotMatch(h.followups.at(-1).text, /日常聊天请用正常标点/)
 })
