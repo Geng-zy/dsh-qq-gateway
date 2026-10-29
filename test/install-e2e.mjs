@@ -6,15 +6,15 @@ import { join } from 'node:path'
 import { fileURLToPath,pathToFileURL } from 'node:url'
 import { spawn,execFileSync } from 'node:child_process'
 import { createServer } from 'node:net'
-const root=fileURLToPath(new URL('../',import.meta.url)), temp=mkdtempSync(join(tmpdir(),'dsh-install-e2e-'))
+const root=fileURLToPath(new URL('../',import.meta.url)),personaRoot=process.env.PERSONA_ROOT??join(root,'../dsh-persona-memory'), temp=mkdtempSync(join(tmpdir(),'dsh-install-e2e-'))
 const freePort=async()=>{const server=createServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const p=server.address().port;await new Promise(r=>server.close(r));return p}
 const mode=process.env.INSTALL_E2E_MODE??'both',hasQq=mode!=='persona',hasPersona=mode!=='qq'
 const webPort=await freePort(), wsPort=await freePort(), home=join(temp,'home'), profile=join(home,'profiles/web'), workspace=join(home,'workspace')
 let child, logs=''
 try {
  const archive=join(temp,'plugin.tgz'),personaArchive=join(temp,'persona.tgz')
- execFileSync('npx',['--offline','--yes','pnpm@11.28.5','pack','--out',archive],{cwd:root,stdio:'pipe'})
- execFileSync('npx',['--offline','--yes','pnpm@11.28.5','pack','--out',personaArchive],{cwd:join(root,'packages/dsh-persona-memory'),stdio:'pipe'})
+ if(hasQq)execFileSync('npx',['--offline','--yes','pnpm@11.28.5','pack','--out',archive],{cwd:root,stdio:'pipe'})
+ if(hasPersona)execFileSync('npx',['--offline','--yes','pnpm@11.28.5','pack','--out',personaArchive],{cwd:personaRoot,stdio:'pipe'})
  mkdirSync(profile,{recursive:true});mkdirSync(workspace)
  writeFileSync(join(profile,'package.json'),JSON.stringify({name:'installer-profile',private:true,dsh:{profile:{bundles:['@deepseek-ai/dsh-base','@deepseek-ai/dsh-web-app',...(hasQq?['dsh-qq-gateway']:[]),...(hasPersona?['dsh-persona-memory']:[])]}},dependencies:{...(hasQq?{'dsh-qq-gateway':'file:'+archive}:{}),...(hasPersona?{'dsh-persona-memory':'file:'+personaArchive}:{})}}))
  writeFileSync(join(profile,'pnpm-workspace.yaml'),'packages:\n  - .\nnodeLinker: hoisted\nautoInstallPeers: false\n')

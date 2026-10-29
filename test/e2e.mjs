@@ -423,6 +423,21 @@ await new Promise(r => setTimeout(r, 1000))
 if (modelRequests.length !== afterAdmin || sent.length !== sentAfterAdmin) await fail('普通群成员继承了管理员豁免')
 log('管理员私聊/群聊默认豁免、旧名单迁移、普通人不继承权限 OK')
 
+// 18. Real OneBot command routing: both allowlisted ordinary contexts are denied before model dispatch.
+const commandRequests=modelRequests.length,commandSends=sent.length
+for(const command of ['help','sid','stop','new','reset']){
+ privateMsg([text('/'+command)],USER+2)
+ groupMsg([text('/'+command)],GROUP,USER+2)
+}
+await waitFor(()=>sent.length>=commandSends+10,'十条普通用户指令拒绝响应')
+if(modelRequests.length!==commandRequests||!sent.slice(commandSends).every(r=>sentText(r).includes('只有机器人管理员')))await fail('普通私聊或群成员绕过命令管理员限制')
+const adminCommandSends=sent.length
+privateMsg([text('/help')],USER)
+groupMsg([text('/sid')],GROUP,USER)
+await waitFor(()=>sent.length>=adminCommandSends+2,'管理员命令继续可用')
+if(!sent.slice(adminCommandSends).some(r=>sentText(r).includes('可用指令'))||!sent.slice(adminCommandSends).some(r=>sentText(r).includes('会话标识')))await fail('管理员help/sid不可用')
+log('真实OneBot：白名单群/私聊全部五条指令仅管理员可用，不调用模型 OK')
+
 log('全部通过')
 if (process.env.E2E_HOLD) {
   // 保留 dsh 和假 SnowLuma，方便在浏览器里看设置页；Ctrl-C 结束

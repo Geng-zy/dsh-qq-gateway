@@ -223,27 +223,51 @@ test('媒体和提示扩展处理期间移出白名单：不再交给模型', as
   assert.equal(h.followups.length, 0)
 })
 
-test('指令：/help /sid 回复，不交给模型；/new 换新会话', async () => {
-  const h = harness({}, memberInfo)
-  await h.privateMsg(8, [text('你好')])
-  await h.privateMsg(8, [text('/help')])
-  await h.privateMsg(8, [text('/sid')])
-  assert.equal(h.followups.length, 1)
-  assert.match(h.sent[0].text, /可用指令/)
-  assert.match(h.sent[1].text, /会话标识：snowluma:FriendMessage:8/)
-  await h.privateMsg(8, [text('/new')])
-  assert.match(h.sent[2].text, /新的对话/)
-  await h.privateMsg(8, [text('再说一句')])
-  assert.equal(h.created.length, 2)
-  assert.notEqual(String(h.created[0].sessionId), String(h.created[1].sessionId))
+test('指令：管理员的/help /sid不调用模型，/new保留旧会话并创建新会话', async () => {
+  const h=harness({},memberInfo)
+  await h.privateMsg(Number(ADMIN),[text('你好')])
+  await h.privateMsg(Number(ADMIN),[text('/help')])
+  await h.privateMsg(Number(ADMIN),[text('/sid')])
+  assert.equal(h.followups.length,1)
+  assert.match(h.sent[0].text,/可用指令/)
+  assert.match(h.sent[1].text,/会话标识：snowluma:FriendMessage:42/)
+  await h.privateMsg(Number(ADMIN),[text('/new')])
+  assert.match(h.sent[2].text,/新的对话/)
+  await h.privateMsg(Number(ADMIN),[text('再说一句')])
+  assert.equal(h.created.length,2)
+  assert.notEqual(String(h.created[0].sessionId),String(h.created[1].sessionId))
 })
 
-test('指令：群里 /new 只有管理员、群主、群管理能用', async () => {
-  const h = harness({}, memberInfo)
-  await h.groupMsg(9, 555, [text('/new')])
-  assert.match(h.sent.at(-1).text, /只有管理员/)
-  await h.groupMsg(9, 555, [text('/new')], 'admin')
-  assert.match(h.sent.at(-1).text, /新的对话/)
+test('全部五条命令仅机器人管理员可用；白名单私聊、群成员、群主和群管理均不能执行',async()=>{
+  for(const command of ['help','sid','stop','new','reset']){
+    const h=harness({whitelist:{enabled:true,groupIds:['555'],privateIds:['9']}},memberInfo)
+    await h.privateMsg(9,[text('/'+command)])
+    for(const role of ['member','owner','admin'])await h.groupMsg(9,555,[text('/'+command)],role)
+    assert.equal(h.sent.length,4)
+    assert.ok(h.sent.every(x=>/只有机器人管理员/.test(x.text)))
+    assert.equal(h.created.length,0)
+    assert.equal(h.followups.length,0)
+    await h.groupMsg(Number(ADMIN),555,[text('/'+command)],'member')
+    assert.doesNotMatch(h.sent.at(-1).text,/只有机器人管理员/)
+    await h.bridge.dispose()
+  }
+})
+
+test('普通群成员不能通过/stop取消共享回复，权限拒绝可静默且不交给模型',async()=>{
+ const h=harness({},memberInfo)
+ await h.groupMsg(9,555,[at(BOT),text('你好')])
+ const before=h.followups.length
+ await h.groupMsg(10,555,[text('/stop')],'owner')
+ assert.equal(h.followups.length,before)
+ assert.ok(!h.followups.some(x=>x.cancelled))
+ h.set({commands:{enabled:true,noPermissionReply:false}})
+ const sent=h.sent.length
+ await h.privateMsg(9,[text('/sid')])
+ assert.equal(h.sent.length,sent)
+ assert.equal(h.followups.length,before)
+ await h.groupMsg(Number(ADMIN),555,[text('/stop')])
+ assert.ok(h.followups.some(x=>x.cancelled))
+ await h.bridge.dispose()
 })
 
 test('只 @ 她不说话：先让她问一句，这个人 60 秒内的下一条算唤醒', async () => {
@@ -415,7 +439,7 @@ test('会话信息：建会话前登记，群聊有群号，群里每人单独�
 })
 
 test('rotateSession：换新的 dsh 会话，发 snowluma/session-changed，下一条进新会话并标成新会话', async () => {
-  const h = harness({}, memberInfo)
+  const h = harness({admins:[ADMIN,'8']}, memberInfo)
   await h.privateMsg(8, [text('第一句')])
   const oldId = String(h.created[0].sessionId)
   const r = await h.bridge.rotateSession('snowluma:FriendMessage:8')

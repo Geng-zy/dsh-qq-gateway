@@ -1,6 +1,6 @@
-# QQ 接入助手与人格记忆插件
+# QQ 接入助手 · dsh-qq-gateway
 
-本仓库从 2.0.0 起提供两个独立的 dsh 插件。仓库地址保持不变。
+本仓库独立维护QQ接入助手。人格与记忆插件已分离到 [dsh-persona-memory](https://github.com/Geng-zy/dsh-persona-memory)，两者可分别安装、构建和发布。旧统一仓库保留历史。
 
 | 插件 | 包名 | 功能 |
 | --- | --- | --- |
@@ -12,8 +12,8 @@
 适用于 dsh **0.2.1-rc.2**、Node **≥22.13**。先等待正在回复或生图的任务完成，停止 dsh；以运行 dsh 的同一系统账号和相同 `DSH_HOME` 执行：
 
 ```sh
-dsh plugin --profile web add "https://github.com/Geng-zy/dsh-snowluma-companion/releases/download/v2.0.2/dsh-qq-gateway-2.0.2.tgz" --ignore-scripts
-dsh plugin --profile web add "https://github.com/Geng-zy/dsh-snowluma-companion/releases/download/v2.0.2/dsh-persona-memory-2.0.2.tgz" --ignore-scripts
+dsh plugin --profile web add "https://github.com/Geng-zy/dsh-qq-gateway/releases/download/v2.1.0/dsh-qq-gateway-2.1.0.tgz" --ignore-scripts
+dsh plugin --profile web add "https://github.com/Geng-zy/dsh-persona-memory/releases/download/v2.1.0/dsh-persona-memory-2.1.0.tgz" --ignore-scripts
 ```
 
 可以只执行其中一条。只装QQ插件使用dsh默认人格；只装人格插件默认等待QQ接入，也可将“会话生效范围”改为全部会话。两者共同安装时QQ新会话采用陪伴预设。插件不会自动修改普通网页会话的全局默认预设。
@@ -22,14 +22,14 @@ dsh plugin --profile web add "https://github.com/Geng-zy/dsh-snowluma-companion/
 
 **已有旧版统一插件时不要直接叠加安装。** 请先按[拆分迁移说明](docs/SPLIT-MIGRATION.md)迁移配置和数据；保留原QQ历史，校验复制后才归档原会话。
 
-[插件安装详细说明](docs/PLUGIN-INSTALL.md) · [发行页](https://github.com/Geng-zy/dsh-snowluma-companion/releases/tag/v2.0.2)
+[插件安装详细说明](docs/PLUGIN-INSTALL.md) · [发行页](https://github.com/Geng-zy/dsh-qq-gateway/releases/tag/v2.1.0)
 
 ## 新服务器部署
 
 支持Ubuntu 22.04/24.04/26.04、systemd、amd64/arm64。26.04尚未完成整机虚拟机安装实测。安装器用于全新环境，已有数据时会停止，避免覆盖。
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Geng-zy/dsh-snowluma-companion/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/Geng-zy/dsh-qq-gateway/main/install.sh | sudo bash
 ```
 
 交互填写账号、端口、密码、主人QQ、Token及模型接口；部署Node、dsh、两个插件和官方SnowLuma Docker环境。完成后显示网址与凭证，并保存私有凭证文件。QQ扫码须本人完成。
@@ -42,7 +42,7 @@ curl -fsSL https://raw.githubusercontent.com/Geng-zy/dsh-snowluma-companion/main
 
 启用QQ插件时自动创建并注册 `DSH_HOME/workspaces/QQ`，在“连接与权限”中可填写其他绝对路径。新QQ会话自动进入该工作区；修改路径后，空闲旧会话完整复制到目标工作区，校验后切换映射并归档原会话。运行中的会话延后迁移。
 
-管理员保持原有最高QQ权限，不受白名单约束。群聊与其他人私聊使用各自白名单；未获准会话不存档、不触发主动聊天。回复打字速度分管理员私聊、其他私聊和群聊，最长等待默认5/8/8秒。[回复规则](docs/CHAT-PACING.md) · [QQ媒体发送](docs/QQ-SENDING.md)
+管理员保持原有最高QQ权限，不受白名单约束。全部内置命令（/help、/sid、/stop、/new、/reset）仅管理员QQ列表中的账号可用，群聊和私聊一致；群主、群管理不会额外获得命令权限。群聊与其他人私聊使用各自白名单；未获准会话不存档、不触发主动聊天。回复打字速度分管理员私聊、其他私聊和群聊，最长等待默认5/8/8秒。[回复规则](docs/CHAT-PACING.md) · [QQ媒体发送](docs/QQ-SENDING.md)
 
 ## 人格与记忆
 
@@ -50,7 +50,7 @@ curl -fsSL https://raw.githubusercontent.com/Geng-zy/dsh-snowluma-companion/main
 
 **隔离边界是记忆接口。** 按当前设计保留原终端、文件等工具权限，没有增加操作系统文件沙箱；这些工具仍可能读取工作区外文件。不能将记忆接口分域描述为文件访问隔离。
 
-[人格编辑机制](docs/PERSONA.md) · [人格插件说明](packages/dsh-persona-memory/README.md)
+[人格编辑机制](docs/PERSONA.md) · [人格插件说明](https://github.com/Geng-zy/dsh-persona-memory)
 
 ![人格编辑器](docs/images/persona-editor.png)
 
@@ -79,6 +79,6 @@ pnpm run build
 pnpm test
 ```
 
-服务端源码位于`src/`，人格包位于`packages/dsh-persona-memory/`；构建同时生成两个可独立安装的包。端到端测试使用隔离dsh和假模型、假OneBot，不发送真实QQ消息。
+本仓库的源码、构建、单元测试和发行包均独立维护。联调时将人格仓库克隆到相邻的`dsh-persona-memory`目录，分别构建，再运行`pnpm run test:integration`或`pnpm run e2e:integration`。真实dsh测试先运行`pnpm run setup-test-env`；测试使用假模型、假OneBot，不发真实QQ消息。
 
 许可证：[AGPL-3.0-or-later](LICENSE)。

@@ -8,7 +8,7 @@ import {execFileSync} from 'node:child_process'
 import * as qq from '../lib/qq/backup.js'
 import {createRequire} from 'node:module'
 import {fileURLToPath,pathToFileURL} from 'node:url'
-const require=createRequire(import.meta.url),sourceCore=fileURLToPath(new URL('../packages/dsh-persona-memory/lib/companion/backup.js',import.meta.url))
+const require=createRequire(import.meta.url),sourceCore=fileURLToPath(new URL('../../dsh-persona-memory/lib/companion/backup.js',import.meta.url))
 const coreBackup=existsSync(sourceCore)?sourceCore:join(dirname(require.resolve('dsh-persona-memory/package.json')),'lib/companion/backup.js')
 const persona=await import(pathToFileURL(coreBackup).href)
 

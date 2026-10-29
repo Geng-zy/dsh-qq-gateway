@@ -82,6 +82,16 @@ class Tests(unittest.TestCase):
             def get(self,url,destination):Path(destination).write_text(json.dumps({'assets':[{'name':'dsh-qq-gateway-'+installer.VERSION+'.tgz'}]}))
         with tempfile.TemporaryDirectory() as temp:
             with self.assertRaises(installer.InstallError):MissingDigest().package(temp)
+    def test_packages_use_independent_repositories(self):
+        requests=[]
+        class Probe(installer.Downloads):
+            def get(self,url,destination):
+                requests.append(url)
+                Path(destination).write_text('{"assets":[]}')
+        for name,repo in [('dsh-qq-gateway','dsh-qq-gateway'),('dsh-persona-memory','dsh-persona-memory')]:
+            with tempfile.TemporaryDirectory() as temp:
+                with self.assertRaises(installer.InstallError):Probe().package(temp,name=name)
+            self.assertEqual(requests[-1],'https://api.github.com/repos/Geng-zy/'+repo+'/releases/tags/v'+installer.VERSION)
     def test_resume_keeps_finished_steps_and_does_not_reinstall(self):
         with tempfile.TemporaryDirectory() as temp:
             c=config(temp+'/install');item=installer.Installer(c,None)

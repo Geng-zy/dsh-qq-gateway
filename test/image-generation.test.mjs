@@ -5,7 +5,7 @@ import { mkdtempSync, rmSync, readFileSync, writeFileSync, utimesSync, existsSyn
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { ImageGenerator, imageTemplate, safeProviderError } from '../lib/image-generation.js'
-import { imageTool } from '../lib/companion/image-tool.js'
+import { imageTool } from '../lib/qq/image-tool.js'
 
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64')
 const b64 = png.toString('base64')

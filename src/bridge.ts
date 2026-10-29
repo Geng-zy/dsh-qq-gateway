@@ -553,12 +553,8 @@ export class Bridge {
     const reply = (text: string): Promise<void> => (this.canSend(event.session, event.getSenderId()) ? event.send(this.groupReplyChain(text, event.message_obj.type === MessageType.GROUP_MESSAGE ? { userId: event.getSenderId(), messageId: event.message_obj.message_id } : undefined, s)) : Promise.resolve()).catch(e => {
       this.deps.log('error', '发送指令回复失败: ' + errText(e))
     })
-    const isGroup = event.message_obj.type === MessageType.GROUP_MESSAGE
-    // AstrBot SHARED_GROUP_ADMIN：私聊谁都能用；群里要管理员（本插件也认 QQ 群主和群管理）
-    const groupRole = String(event.message_obj.raw_message.sender?.role ?? '')
-    const sharedAdmin = !isGroup || admin || groupRole === 'owner' || groupRole === 'admin'
-    if ((name === 'new' || name === 'reset') && !sharedAdmin) {
-      if (s.commands.noPermissionReply) await reply('只有管理员能在群里用 /' + name + '。')
+    if (!admin) {
+      if (s.commands.noPermissionReply) await reply('只有机器人管理员可以使用命令。')
       return true
     }
     const chat = this.chats.get(umo)

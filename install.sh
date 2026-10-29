@@ -2,12 +2,12 @@
 # Interactive server installation; user input is read from /dev/tty, including curl | sudo bash.
 set -euo pipefail
 umask 077
-INSTALL_VERSION=2.0.2
-INSTALLER_SHA256=8f5d62a97318c77a040974b315f3ab4305ee4f462a6868b687122a0d17e677b2
+INSTALL_VERSION=2.1.0
+INSTALLER_SHA256=0724428849ff3c434af00d90bb8081eee744b83219067ff26ae8c24c7e4fbea8
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
   cat <<'HELP'
 SnowLuma Companion 一键安装（全新Ubuntu amd64/arm64，systemd）
-运行：curl -fsSL https://raw.githubusercontent.com/Geng-zy/dsh-snowluma-companion/main/install.sh | sudo bash
+运行：curl -fsSL https://raw.githubusercontent.com/Geng-zy/dsh-qq-gateway/main/install.sh | sudo bash
 可选参数请下载后运行：sudo bash install.sh --dry-run
 中断续装：sudo python3 <部署目录>/install.py --resume <部署目录>
 查看凭证：sudo python3 <部署目录>/install.py --show-info <部署目录>
@@ -30,6 +30,6 @@ installer_tmp="$(mktemp -d /tmp/dsh-companion-bootstrap.XXXXXX)"
 cleanup() { python3 -c 'import shutil,sys; shutil.rmtree(sys.argv[1])' "$installer_tmp"; }
 trap cleanup EXIT
 curl --fail --show-error --silent --location --proto '=https' --tlsv1.2 \
-  "https://raw.githubusercontent.com/Geng-zy/dsh-snowluma-companion/v${INSTALL_VERSION}/deploy/install.py" -o "$installer_tmp/install.py"
+  "https://raw.githubusercontent.com/Geng-zy/dsh-qq-gateway/v${INSTALL_VERSION}/deploy/install.py" -o "$installer_tmp/install.py"
 printf '%s  %s\n' "$INSTALLER_SHA256" "$installer_tmp/install.py" | sha256sum --check --status
 python3 "$installer_tmp/install.py" "$@"

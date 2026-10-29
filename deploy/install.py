@@ -22,11 +22,12 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-VERSION = '2.0.2'
+VERSION = '2.1.0'
 DSH_VERSION = '0.2.1-rc.2'
 NODE_VERSION = '24.22.1'
 PNPM_VERSION = '11.28.5'
-REPO = 'Geng-zy/dsh-snowluma-companion'
+REPO = 'Geng-zy/dsh-qq-gateway'
+PACKAGE_REPOS = {'dsh-qq-gateway': REPO, 'dsh-persona-memory': 'Geng-zy/dsh-persona-memory'}
 SUPPORTED_UBUNTU = ('22.04', '24.04', '26.04')
 VOLUMES = ['qq-gateway-data', 'qq-client-config', 'qq-client-data']
 
@@ -204,7 +205,7 @@ class Downloads:
             shutil.copyfile(local, archive)
         else:
             meta = Path(directory) / 'release.json'
-            self.get('https://api.github.com/repos/' + REPO + '/releases/tags/v' + VERSION, meta)
+            self.get('https://api.github.com/repos/' + PACKAGE_REPOS[name] + '/releases/tags/v' + VERSION, meta)
             release = json.loads(meta.read_text()); asset = next((a for a in release.get('assets', []) if a.get('name') == archive.name), None)
             if not asset or not re.fullmatch(r'sha256:[0-9a-f]{64}', asset.get('digest', '')):
                 raise InstallError('GitHub发行包或SHA256摘要尚未就绪，请稍后重试。')
