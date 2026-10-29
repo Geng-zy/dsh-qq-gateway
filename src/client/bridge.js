@@ -19,6 +19,7 @@ window.__ModuleLoader__.load({
 		/** 设置服务里的配置行 id（cordis.patch.yml 里的 id） */
 
 		var zh = {
+            language: "zh",
             typingInherited: "速度、最短等待未单独设置时沿用原值；最长等待默认管理员私聊5秒、其他私聊和群聊8秒。",
             typingProfileHint: "按该类回复的非空白字符数计算等待。速度为0或关闭开关时不等待；此时间不包含模型生成与群限频等待。",
             typingMax: "最长等待（秒）",
@@ -390,6 +391,7 @@ window.__ModuleLoader__.load({
 			groupWindowSecondsHint: "群发送数量限制的统计窗口，单位为秒，默认 60。与“群里一段时间最多发几条”配合使用。",
 		};
 		var en = {
+            language: "en",
             typingInherited: "Unset speed and minimum inherit the previous setting. Maximum defaults: administrator private 5s; other private and groups 8s.",
             typingProfileHint: "Uses non-whitespace reply length. Disable or set speed to 0 to skip typing delay. Model generation and group rate waits are separate.",
             typingMax: "Maximum wait (s)",
