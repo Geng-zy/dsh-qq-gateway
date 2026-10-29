@@ -22,7 +22,7 @@ import { extractForwards, extractQuoted } from './quoted.js'
 import type { SttSettings } from './stt.js'
 import type { SessionStore } from './store.js'
 import { Pacer, splitTyping, type PaceSettings } from './pacer.js'
-import { segmentEnabled, splitReply, type SegmentSettings } from './segment.js'
+import { segmentEnabled, splitReply, joinReply, type SegmentSettings } from './segment.js'
 import { planPieces, ttsActive, ttsHint, type Speech, type TtsSettings } from './tts.js'
 import type { Logger } from './onebot/server.js'
 import { TtlCache } from './cache.js'
@@ -975,7 +975,7 @@ export class Bridge {
       const adminPrivate = !isGroup && settings.admins.includes(chat.session.session_id)
       const segments = segmentEnabled(settings.segment, { group: isGroup, adminPrivate: chat.info.adminPrivate })
         ? splitReply(text, settings.segment.maxSegments)
-        : [text]
+        : [chat.info.adminPrivate ? text : joinReply(text)]
       // 拆成几段时，每段按自己的字数等，但每段有单独的上限（不然一行十几个字就等十秒，八行要等一分钟）
       // 本插件新增：文字转语音。先把每段标上用不用语音，语音马上开始合成（发的时候再等它），发送顺序不变
       const active = this.deps.tts !== undefined && ttsActive(settings.tts, { group: isGroup, adminPrivate: chat.info.adminPrivate })

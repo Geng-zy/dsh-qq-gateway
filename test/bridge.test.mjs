@@ -463,7 +463,11 @@ test('分段发送：主人私聊按行拆成几条、按顺序发，每条都�
   await h.privateMsg(8, [text('你好')])
   h.turn(String(h.created[1].sessionId), '你好呀\n我是大肥鱼')
   await new Promise(r => setTimeout(r, 30))
-  assert.equal(h.sent.at(-1).text, '你好呀\n我是大肥鱼')
+  assert.equal(h.sent.at(-1).text, '你好呀 我是大肥鱼')
+  await h.groupMsg(8, 555, [at(BOT), text('你好')])
+  h.turn(String(h.created[2].sessionId), '你好呀\n\n大家好')
+  await new Promise(r => setTimeout(r, 30))
+  assert.equal(h.sent.at(-1).text, '你好呀 大家好')
 })
 
 test('会话已经在 dsh 里开着（比如网页先接上了）：直接用它，不新建也不恢复', async () => {
