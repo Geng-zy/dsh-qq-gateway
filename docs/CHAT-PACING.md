@@ -5,7 +5,7 @@
 管理员私聊、其他人私聊、群聊各有一张设置卡片，分别配置：
 
 - 模拟打字开关。
-- 打字速度：每分钟非空白字符数，0表示不等待。
+- 打字速度：每分钟非空白字符数，三类默认均为150字/分钟，0表示不等待。
 - 最短等待与最长等待，单位秒。最长等待默认管理员私聊5秒，其他人私聊和群聊8秒；这是模拟打字上限，不是请求超时。
 
 例如：管理员私聊60字/分钟、其他私聊120字/分钟、群聊240字/分钟，同一句5字回复分别计算为5秒、2.5秒、1.25秒，再应用各自的最短/最长范围。
@@ -14,7 +14,7 @@
 
 ## 旧设置兼容
 
-此前`typingPrivate`同时控制两类私聊，`typingGroup`控制群聊，`typingCharsPerMinute/typingMinSeconds/typingMaxSeconds`为共享参数。新版速度和最短等待保留旧值作为兼容来源。自1.4.3起，三类最长等待未显式配置时分别使用5/8/8秒；已显式保存的三类最长等待保持不变。
+此前`typingPrivate`同时控制两类私聊，`typingGroup`控制群聊，`typingCharsPerMinute/typingMinSeconds/typingMaxSeconds`为共享参数。三类未单独配置速度时，继承共享速度；共享速度的源码默认值为150。已保存的类别速度或旧共享速度仍优先使用，修改默认值不会覆盖用户的自定义设置。最短等待继续保留旧值作为兼容来源。自1.4.3起，三类最长等待未显式配置时分别使用5/8/8秒；已显式保存的三类最长等待保持不变。
 
 新增`typingAdminPrivate`及三类`typing{AdminPrivate|Private|Group}{CharsPerMinute|MinSeconds|MaxSeconds}`参数。其他私聊/群聊的开关继续使用`typingPrivate/typingGroup`，不重复创建同义配置。
 
