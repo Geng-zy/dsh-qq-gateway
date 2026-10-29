@@ -1,3 +1,4 @@
+import { type UpdateConfig } from './updates.js';
 import z from '@deepseek-ai/schemastery';
 import type { Context as CordisContext } from '@deepseek-ai/cordis';
 import type { AgentRegistry } from '@deepseek-ai/dsh-agent';
@@ -13,7 +14,7 @@ export type { PromptPayload, SentPayload, SessionChange, SessionInfo } from './b
 export type { Converted, Media, ModelPart } from './media.js';
 export { ActionFailed, ApiNotAvailable, NetworkError } from './onebot/errors.js';
 import { type QqFeatureConfig } from './qq/config.js';
-export interface Config extends QqFeatureConfig {
+export interface Config extends QqFeatureConfig, UpdateConfig {
     qqRules: import('./qq/rules.js').RuleRow[];
     id: string;
     ws_reverse_host: string;

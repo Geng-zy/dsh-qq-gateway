@@ -23,11 +23,17 @@ export async function runUi(session) {
   await page.getByRole('button',{name:'插件',exact:true}).click()
   await page.getByText('dsh-qq-gateway',{exact:true}).click()
   const app=page.locator('.sc-app');await app.waitFor()
-  assert.equal(await app.locator('.sc-nav-item').count(),8,'QQ UI: '+await app.innerText())
+  assert.equal(await app.locator('.sc-nav-item').count(),9,'QQ UI: '+await app.innerText())
   assert.equal(await app.getByText('人格与核心记忆',{exact:true}).count(),0,'QQ页面不包含人格设置')
   const navigate=async title=>{await app.locator('.sc-nav-item').filter({hasText:title}).click();await page.waitForTimeout(80)}
   const openSection=async id=>{const section=app.locator('[data-section="'+id+'"]');if(!await section.evaluate(e=>e.open))await section.locator(':scope > summary').click();await page.waitForFunction(id=>document.querySelector('[data-section="'+id+'"]')?.open,id);assert.equal(await app.locator('.sc-section[open]').count(),1,'only one category may be open');return section}
   const collapse=async()=>{await app.getByRole('button',{name:'全部收起',exact:true}).click();await page.waitForFunction(()=>[...document.querySelectorAll('.sc-section:not([hidden])')].every(e=>!e.open))}
+  await navigate('开发者选项');await openSection('developer-updates')
+  assert.equal(await app.getByRole('switch',{name:'开启本插件更新提醒',exact:true}).isChecked(),false)
+  assert.equal(await app.getByRole('button',{name:'立即检查',exact:true}).isDisabled(),true)
+  await app.getByRole('button',{name:'读取dsh已配置模型',exact:true}).click()
+  await app.getByText('完整跟踪仓库依赖', {exact:false}).waitFor()
+  await page.screenshot({path:join(artifacts,'qq-developer-updates.png'),fullPage:true})
   await navigate('聊天与回复');await openSection('bridge-wake')
   const keyword=app.locator('#snowluma-bridge-wakeKeywords'), groupContext=app.locator('#companion-core-groupContextCount')
   const wakeValue='UI测试唤醒'+Date.now().toString(36)
@@ -103,7 +109,7 @@ export async function runUi(session) {
   await page.emulateMedia({colorScheme:'light'});await page.setViewportSize({width:1440,height:1050})
   console.log('[ui] Image provider presets, settings save, quota-labeled real mocked generation, preview/download and light/dark rendering passed')
   await settingsDialog.getByRole('button',{name:'人格与记忆',exact:true}).click()
-  assert.equal(await app.locator('.sc-nav-item').count(),7)
+  assert.equal(await app.locator('.sc-nav-item').count(),8)
   await navigate('人格与核心记忆')
   const persona=app.locator('[data-section="companion-persona"]')
   if(!await persona.evaluate(e=>e.open))await persona.locator('summary').first().click()

@@ -39,7 +39,7 @@ const deadline = Date.now() + Number(process.env.E2E_TIMEOUT_MS ?? 240_000)
 
 const log = (...a) => console.log('[e2e]', ...a)
 let finished = false
-const fail = async message => { console.error('[e2e] FAIL: ' + message); await cleanup(); process.exit(1) }
+const fail = async message => { console.error('[e2e] FAIL: ' + message); try { writeFileSync(join(ROOT,'.cache-e2e-failure.log'),dshLog) } catch {} await cleanup(); process.exit(1) }
 
 if (!existsSync(join(BRIDGE, 'lib', 'index.js'))) { console.error('[e2e] 找不到插件一：' + BRIDGE + '（先在那里 pnpm run build）'); process.exit(1) }
 
@@ -182,6 +182,9 @@ const workspace = join(home, 'workspace')
 mkdirSync(workspace)
 writeFileSync(join(profile, 'cordis.patch.yml'), `- id: snowluma-bridge
   config:
+    updatesGithubToken: update-gh-fixture-secret
+    updatesSmtpPass: update-mail-fixture-secret
+    updatesPushKey: update-push-fixture-secret
     ws_reverse_host: 127.0.0.1
     ws_reverse_port: ${WS_PORT}
     ws_reverse_token: ${TOKEN}
@@ -205,6 +208,9 @@ writeFileSync(join(profile, 'cordis.patch.yml'), `- id: snowluma-bridge
     selectedDefault: companion
 - id: companion-core
   config:
+    updatesGithubToken: update-gh-fixture-secret
+    updatesSmtpPass: update-mail-fixture-secret
+    updatesPushKey: update-push-fixture-secret
     sessionScope: all
     logLevel: debug
     embedApiUrl: ${llmUrl.replace('/anthropic', '')}/v1
@@ -599,7 +605,7 @@ if (!dl.ok || bytes[0] !== 0x1f || bytes[1] !== 0x8b) await fail('下载备份�
 // 包里有两个插件的设置，但没有 Key 和 Token
 const tarText = (await import('node:zlib')).gunzipSync(bytes).toString('utf-8')
 if(!tarText.includes('masterMaxRounds')||tarText.includes('typingCharsPerMinute')||tarText.includes('selectedDefault'))await fail('人格备份越界包含QQ或dsh全局设置')
-if (tarText.includes(TOKEN) || tarText.includes('e2e-embed-key')) await fail('备份包里有 Key 或 Token')
+if (tarText.includes(TOKEN) || tarText.includes('e2e-embed-key') || ['update-gh-fixture-secret','update-mail-fixture-secret','update-push-fixture-secret'].some(x=>tarText.includes(x))) await fail('备份包里有 Key 或 Token')
 // 只包含主人原始会话（包括之前轮换保留的）；普通私聊、群聊及活动文件不混入。
 const qqMade=await api('POST','qq:backup/create',{items:['archiveMaster','sessionsMaster','settingsBridge']})
 if(qqMade.json.manifest?.owner!=='dsh-qq-gateway'||qqMade.json.manifest.counts.masterSessions<2)await fail('QQ插件未独立备份主人当前/历史会话')

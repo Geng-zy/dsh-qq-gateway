@@ -15,6 +15,10 @@ export interface PushSettings {
 export interface AlertMessage {
     title: string;
     text: string;
+    attachments?: Array<{
+        filename: string;
+        content: string;
+    }>;
 }
 export declare function sendMail(s: MailSettings, m: AlertMessage): Promise<void>;
 /** Server酱：新版 SendKey（sctp 开头）走 https://<uid>.push.ft07.com，旧版走 sctapi.ftqq.com。 */

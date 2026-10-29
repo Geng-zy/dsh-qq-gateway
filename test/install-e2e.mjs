@@ -40,6 +40,12 @@ try {
  assert.equal(bridge.listening,true);assert.ok(bridge.workspace.id);assert.ok(bridge.workspace.path.endsWith('/QQ'))
  const qq=await get('qq-gateway/state');assert.deepEqual(qq.backupItemsAll,['archiveMaster','sessionsMaster','settingsBridge'])}
  if(hasPersona){const core=await get('companion/state');assert.ok(core.archive);assert.equal(core.snowluma,hasQq);assert.equal(core.backupItemsAll.length,5);assert.equal(core.personaStatus.sessionScope,'qq')}
+ for(const prefix of [...(hasQq?['qq-gateway']:[]),...(hasPersona?['companion']:[])]){
+  const updates=await get(prefix+'/updates');assert.equal(updates.enabled,false);assert.equal(updates.busy,false);assert.ok(updates.catalog.sources.length>20);assert.equal(updates.lastAttempt,undefined)
+  const denied=await fetch(physical+'api/'+prefix+'/updates/check',{method:'POST',headers});assert.equal(denied.status,409)
+  const report=await fetch(physical+'api/'+prefix+'/updates/report.md',{headers});assert.equal(report.status,200);assert.match(await report.text(),/不扫描宿主/)
+  const unauthorized=await fetch(physical+'api/'+prefix+'/updates',{headers:{host:headers.host},redirect:'manual'});assert.notEqual(unauthorized.status,200)
+ }
  const models=hasQq?await get('snowluma-bridge/llm/dsh-models'):null
  if(models){ assert.equal(models.default.provider,'deepseek-official');assert.equal(models.default.model,'deepseek-flash')
  }

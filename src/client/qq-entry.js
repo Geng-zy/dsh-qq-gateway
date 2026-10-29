@@ -3,10 +3,10 @@ const PACKAGE="dsh-qq-gateway";
 window.__ModuleLoader__.load({id: PACKAGE,factory:require=>{
  const R=require('react'),React=R.createElement?R:R.default,h=React.createElement,P=require('@deepseek-ai/dsh-client-ui-primitives');
  const modules=["ui-bridge", "ui-extra"].map(x=>require(PACKAGE+'/'+x)),Layout=require(PACKAGE+'/ui-layout');
- const NS=PACKAGE.replaceAll('-',''),categoryLabels={"overview": "运行概览", "connection": "连接与权限", "chat": "聊天与回复", "memory": "消息存档", "life": "主动聊天", "media": "图片、语音与视频", "backup": "备份与迁移", "maintenance": "维护与提醒"},title="QQ 接入助手";
+ const NS=PACKAGE.replaceAll('-',''),categoryLabels={"overview": "运行概览", "connection": "连接与权限", "chat": "聊天与回复", "memory": "消息存档", "life": "主动聊天", "media": "图片、语音与视频", "backup": "备份与迁移", "maintenance": "维护与提醒", "developer": "开发者选项"},title="QQ 接入助手";
  function Editor(props){
   if(props.view==='summary')return title;
-  const english=props.t?.('language')==='en',title=english?"QQ Gateway":"QQ 接入助手",categories=english?{overview:'Overview',connection:'Connection & access',chat:'Chat & context',memory:"Message archives",life:"Proactive chat",media:'Images, voice & video',backup:'Backup & migration',maintenance:'Maintenance'}:categoryLabels;
+  const english=props.t?.('language')==='en',title=english?"QQ Gateway":"QQ 接入助手",categories=english?{overview:'Overview',connection:'Connection & access',chat:'Chat & context',memory:"Message archives",life:"Proactive chat",media:'Images, voice & video',backup:'Backup & migration',maintenance:'Maintenance',developer:'Developer options'}:categoryLabels;
   const states=modules.map((_,i)=>props['useForm'+i](s=>s));
   const [category,setCategory]=React.useState(()=>{try{const previous=localStorage.getItem(PACKAGE+':category');return Object.hasOwn(categories,previous)?previous:'overview'}catch{return 'overview'}}),[query,setQuery]=React.useState(''),[activeSection,setActiveSection]=React.useState(()=>{try{return localStorage.getItem(PACKAGE+':active-section')||'companion-status'}catch{return 'companion-status'}}),[documents,setDocuments]=React.useState({});
   React.useEffect(()=>{try{localStorage.setItem(PACKAGE+':active-section',activeSection)}catch{}},[activeSection]);

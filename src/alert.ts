@@ -18,7 +18,7 @@ export interface MailSettings {
 export type PushService = 'off' | 'serverchan' | 'pushplus'
 export interface PushSettings { service: PushService; key: string }
 
-export interface AlertMessage { title: string; text: string }
+export interface AlertMessage { title: string; text: string; attachments?: Array<{filename: string; content: string}> }
 
 const TIMEOUT_MS = 20_000
 
@@ -35,7 +35,7 @@ export async function sendMail(s: MailSettings, m: AlertMessage): Promise<void> 
     connectionTimeout: TIMEOUT_MS, greetingTimeout: TIMEOUT_MS, socketTimeout: TIMEOUT_MS,
   })
   try {
-    await transport.sendMail({ from: s.user.trim(), to: s.to.trim() || s.user.trim(), subject: m.title, text: m.text })
+    await transport.sendMail({ from: s.user.trim(), to: s.to.trim() || s.user.trim(), subject: m.title, text: m.text, attachments: m.attachments })
   } finally {
     transport.close()
   }

@@ -1,3 +1,5 @@
+import { UpdateMonitor, updateSchema, type UpdateConfig } from './updates.js'
+import { updateCatalog } from './update-catalog.js'
 // dsh 插件入口：照 AstrBot 的 aiocqhttp（OneBot v11）适配器，把 SnowLuma 接到 dsh。
 
 import z from '@deepseek-ai/schemastery'
@@ -28,7 +30,7 @@ export { ActionFailed, ApiNotAvailable, NetworkError } from './onebot/errors.js'
 
 import { qqFeatureSchema, type QqFeatureConfig } from './qq/config.js'
 import { applyQqFeatures } from './qq/features.js'
-export interface Config extends QqFeatureConfig {
+export interface Config extends QqFeatureConfig, UpdateConfig {
   qqRules: import('./qq/rules.js').RuleRow[]
   id: string
   ws_reverse_host: string
@@ -152,6 +154,7 @@ export type LiveConfig = { [K in keyof Config]: { get(): Config[K] } }
 
 // 每项都标 .volatile()：dsh 的设置服务只对这种字段提供在线编辑，保存后插件不重启、直接读到新值。
 export const Config: z<LiveConfig> = z.object({
+  ...updateSchema,
   ...qqFeatureSchema,
   qqRules: z.array(z.any()).default([]).volatile().description('QQ存档及主动聊天的会话例外规则'),
   id: z.string().default('snowluma').volatile().description('平台 ID，会话标识的第一段；实例迁移时保持不变，以沿用会话、规则和记忆'),
@@ -354,6 +357,8 @@ export async function apply(ctx: Context, live: LiveConfig): Promise<void> {
     else console.log(line)
   }
 
+  const updates = new UpdateMonitor({ catalog: updateCatalog, directory: join(defaultDataDir(), 'developer'), settings: () => Object.fromEntries(Object.keys(updateSchema).map(key => [key, get(key as keyof Config)])) as unknown as UpdateConfig, llm: () => ctx.get('llm' as never) as never })
+  ctx.effect(() => updates.start(), 'upstream updates: independent and opt-in')
   const callAction = (action: string, params: Record<string, unknown> = {}): Promise<any> => adapter.bot.callAction(action, params)
   const videoSettings = () => ({
     enabled: get('videoFrames'),
@@ -560,6 +565,7 @@ export async function apply(ctx: Context, live: LiveConfig): Promise<void> {
   }
   // 视频：GET <dsh>/api/snowluma-bridge/ffmpeg 查状态；POST <dsh>/api/snowluma-bridge/ffmpeg/install 开始安装
   ctx.on('connection/request' as never, (async (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse, next: () => Promise<void>) => {
+    if (await updates.handle(req, res, '/api/qq-gateway/updates')) return
     const path = new URL(req.url ?? '/', 'http://localhost').pathname
     const json = (code: number, value: unknown): void => {
       res.writeHead(code, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
