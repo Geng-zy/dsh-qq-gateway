@@ -1,6 +1,8 @@
 # QQ 接入助手 · dsh-qq-gateway
 
-本仓库独立维护QQ接入助手。人格与记忆插件已分离到 [dsh-persona-memory](https://github.com/Geng-zy/dsh-persona-memory)，两者可分别安装、构建和发布。旧统一仓库保留历史。
+本仓库独立维护QQ接入助手。人格与记忆插件已分离到 [dsh-persona-memory](https://github.com/Geng-zy/dsh-persona-memory)，两者可分别安装、构建和发布。旧统一仓库已删除，不再作为安装或维护入口。
+
+维护入口：[本插件独立交接文档](docs/HANDOFF.md)。
 
 | 插件 | 包名 | 功能 |
 | --- | --- | --- |
