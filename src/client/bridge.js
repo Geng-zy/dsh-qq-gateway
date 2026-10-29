@@ -943,13 +943,13 @@ window.__ModuleLoader__.load({
 				enumField("rateLimitStrategy", RATE_STRATEGIES),
 				enumField("sttMode", STT_MODES),
 				enumField("pushService", PUSH_SERVICES),
-				enumField("ttsMode", TTS_MODES), enumField("updatesPushService", PUSH_SERVICES)
+				enumField("ttsMode", TTS_MODES), enumField("updatesPushService", PUSH_SERVICES), enumField("updatesModelSource", ["dsh","api"]), enumField("updatesApiProtocol", ["openai","anthropic"])
 			], LISTS.map(listField), BOOLS.map(boolField), TEXTS.map(function (f) { var field=P.settingsTextField(f);if(f!=="workspacePath")return field;return Object.assign({},field,{parse:function(text){var v=text.trim();if(v!==""&&!/^(\/|[A-Za-z]:[\\/])/.test(v))return undefined;return field.parse(text)}}); }));
 			var secrets = SECRETS.map(function (field) {
 				return { field: field, write: function (text) { return scope.mutate([{ op: "set", path: [field], value: text }]); } };
 			});
 			var form = sharedForm || new P.SettingsFormModel(scope, specs, secrets);
-			var all = INTS.map(function (x) { return x[0]; }).concat(["logLevel", "rateLimitStrategy", "sttMode", "pushService", "ttsMode", "updatesPushService"], LISTS, BOOLS, TEXTS, SECRETS);
+			var all = INTS.map(function (x) { return x[0]; }).concat(["logLevel", "rateLimitStrategy", "sttMode", "pushService", "ttsMode", "updatesPushService", "updatesModelSource", "updatesApiProtocol"], LISTS, BOOLS, TEXTS, SECRETS);
 			// 设置服务不把密钥发给浏览器，只告诉它有没有设置；由 refreshSecrets 向服务查询
 			var secretSet = {};
 			function compute() {

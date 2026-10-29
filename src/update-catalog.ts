@@ -2,7 +2,7 @@
 import type {Catalog} from "./updates.js"
 export const updateCatalog: Catalog = {
   "owner": "dsh-qq-gateway",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "repository": "https://github.com/Geng-zy/dsh-qq-gateway",
   "lockHash": "6a6cb763535a656d2deddd91539f8ac798bf510cbd71381569685ca25e87b521",
   "sources": [
@@ -971,7 +971,7 @@ export const updateCatalog: Catalog = {
       "name": "dsh-qq-gateway正式发行",
       "kind": "github",
       "target": "Geng-zy/dsh-qq-gateway",
-      "current": "2.3.1",
+      "current": "2.4.0",
       "purpose": "本插件公开正式发行；不自动下载安装",
       "files": [
         "README.md"
@@ -983,7 +983,7 @@ export const updateCatalog: Catalog = {
       "name": "人格记忆插件可选联动",
       "kind": "github",
       "target": "Geng-zy/dsh-persona-memory",
-      "current": "2.3.1",
+      "current": "2.4.0",
       "purpose": "可选插件间事件与服务接口兼容；独立安装不要求另一个插件在场",
       "files": [
         "docs/SPLIT-MIGRATION.md"
@@ -1504,6 +1504,30 @@ export const updateCatalog: Catalog = {
         "src/image-generation.ts"
       ],
       "category": "upstream"
+    },
+    {
+      "id": "service:anthropic",
+      "name": "Anthropic报告API",
+      "kind": "document",
+      "target": "https://platform.claude.com/docs/en/release-notes/api",
+      "purpose": "独立报告模型模板的公开接口与弃用说明",
+      "files": [
+        "src/update-model.ts",
+        "src/client/updates.js"
+      ],
+      "category": "service"
+    },
+    {
+      "id": "service:siliconflow",
+      "name": "硅基流动报告API",
+      "kind": "document",
+      "target": "https://docs.siliconflow.cn/cn/release-notes/overview",
+      "purpose": "独立报告模型模板的公开接口与弃用说明",
+      "files": [
+        "src/update-model.ts",
+        "src/client/updates.js"
+      ],
+      "category": "service"
     }
   ],
   "limitations": [
