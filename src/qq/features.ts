@@ -20,7 +20,7 @@ import { Proactive } from './proactive.js'
 import { applyPendingImport, cleanItems, configuredItems, createBackup, inspectBackup, ITEMS, itemsOf, listBackups, readSavedSettings, safeBackupName, restoreContents, SETTINGS_ITEMS, type BackupItem, type Manifest, type RestorePlan } from './backup.js'
 import type { MasterSessionServices } from './master-sessions.js'
 const errText = (e: unknown): string => e instanceof Error ? e.message : String(e)
-export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config>(key: K) => Config[K], log: (level: 'debug'|'info'|'warn'|'error', message: string) => void, localBridge: SnowlumaService) {
+export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config>(key: K) => Config[K], log: (level: 'debug'|'info'|'warn'|'error', message: string) => void, localBridge: SnowlumaService, settingDescriptions:Record<string,string>={}) {
   const logs: Array<{time:number;level:string;message:string}> = []
   const writer=log;log=(level,message)=>{logs.push({time:Date.now(),level,message});if(logs.length>200)logs.shift();writer(level,message)}
   const dir = defaultDataDir()
@@ -316,7 +316,7 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
     // 导入前的备份什么都带上，万一要退回去
     const chosen = reason === 'before-import' ? ITEMS.filter(i => i !== 'sessionsMaster' || !!(sessionServices().bridge?.masterPrivateBindings && sessionServices().persistence)) : items ?? configuredItems(get('backupItems'))
     const r = await createBackup({
-      dataDir: dir, db: archive.db, outDir: backupsDir, reason, plugin: pluginVersion, schema: SCHEMA_VERSION, settings: settingsSnapshot(),
+      settingDescriptions, dataDir: dir, db: archive.db, outDir: backupsDir, reason, plugin: pluginVersion, schema: SCHEMA_VERSION, settings: settingsSnapshot(),
       embed: { ...(es.model.trim() ? { model: es.model.trim() } : {}), ...(Number.isFinite(dim) ? { dim } : {}) }, keep: get('backupKeep'),
       items: chosen, sessionServices: sessionServices(), settingsFiles: chosen.some(i => SETTINGS_ITEMS.includes(i)) ? captureSettings() : {},
     })

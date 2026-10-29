@@ -12,8 +12,8 @@
 适用于 dsh **0.2.1-rc.2**、Node **≥22.13**。先等待正在回复或生图的任务完成，停止 dsh；以运行 dsh 的同一系统账号和相同 `DSH_HOME` 执行：
 
 ```sh
-dsh plugin --profile web add "https://github.com/Geng-zy/dsh-qq-gateway/releases/download/v2.1.0/dsh-qq-gateway-2.1.0.tgz" --ignore-scripts
-dsh plugin --profile web add "https://github.com/Geng-zy/dsh-persona-memory/releases/download/v2.1.0/dsh-persona-memory-2.1.0.tgz" --ignore-scripts
+dsh plugin --profile web add "https://github.com/Geng-zy/dsh-qq-gateway/releases/download/v2.2.0/dsh-qq-gateway-2.2.0.tgz" --ignore-scripts
+dsh plugin --profile web add "https://github.com/Geng-zy/dsh-persona-memory/releases/download/v2.2.0/dsh-persona-memory-2.2.0.tgz" --ignore-scripts
 ```
 
 可以只执行其中一条。只装QQ插件使用dsh默认人格；只装人格插件默认等待QQ接入，也可将“会话生效范围”改为全部会话。两者共同安装时QQ新会话采用陪伴预设。插件不会自动修改普通网页会话的全局默认预设。
@@ -22,7 +22,7 @@ dsh plugin --profile web add "https://github.com/Geng-zy/dsh-persona-memory/rele
 
 **已有旧版统一插件时不要直接叠加安装。** 请先按[拆分迁移说明](docs/SPLIT-MIGRATION.md)迁移配置和数据；保留原QQ历史，校验复制后才归档原会话。
 
-[插件安装详细说明](docs/PLUGIN-INSTALL.md) · [发行页](https://github.com/Geng-zy/dsh-qq-gateway/releases/tag/v2.1.0)
+[插件安装详细说明](docs/PLUGIN-INSTALL.md) · [发行页](https://github.com/Geng-zy/dsh-qq-gateway/releases/tag/v2.2.0)
 
 ## 新服务器部署
 
@@ -82,3 +82,7 @@ pnpm test
 本仓库的源码、构建、单元测试和发行包均独立维护。联调时将人格仓库克隆到相邻的`dsh-persona-memory`目录，分别构建，再运行`pnpm run test:integration`或`pnpm run e2e:integration`。真实dsh测试先运行`pnpm run setup-test-env`；测试使用假模型、假OneBot，不发真实QQ消息。
 
 许可证：[AGPL-3.0-or-later](LICENSE)。
+
+## 导出文件说明
+
+新备份自带人可读迁移指南、逐文件JSON说明以及实际SQLite表/字段/引用说明，可交给dsh适配其他插件。说明与数据一起校验，不重复导出正文，也不扩大所选备份范围。[文件格式与迁移方法](docs/BACKUP-FORMAT.md)。

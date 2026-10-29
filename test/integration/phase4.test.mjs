@@ -230,7 +230,7 @@ test('备份：按勾选打包；导入时只换勾选的部分，没勾的保�
   assert.equal(small.manifest.counts.archiveMessages, 0)
   assert.equal(small.manifest.counts.masterSessions, 0)
   assert.deepEqual(small.manifest.settings, {}, '没勾插件二的设置')
-  const paths = small.manifest.files.map(f => f.path).sort()
+  const paths = small.manifest.files.filter(f=>!f.path.startsWith('migration/')).map(f => f.path).sort()
   assert.deepEqual(paths, ['persona/persona.md'])
   const smallInspect = await inspectBackup(join(out, small.name), join(dataDir, '.i1'))
   assert.deepEqual(readSavedSettings(smallInspect.dir, ['settingsBridge']), {}, '人格插件不导出QQ设置')

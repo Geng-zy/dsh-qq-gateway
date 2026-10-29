@@ -17,6 +17,7 @@ import { sendMail, sendPush, type AlertMessage, type PushService } from './alert
 import { Watchdog, type WatchStatus } from './watch.js'
 import { Tts, testSpeak, type TtsMode, type TtsSettings } from './tts.js'
 import { join } from 'node:path'
+import {describeSettings} from './qq/backup-guide.js'
 import { QqWorkspaceManager } from './qq-workspace.js'
 
 export * from './adapter.js'
@@ -670,7 +671,7 @@ export async function apply(ctx: Context, live: LiveConfig): Promise<void> {
   }) as never)
 
   // 本插件自带设置页（client.js），告诉 dsh 不用按 schema 自动生成表单
-  await applyQqFeatures(ctx, get, log, service)
+  await applyQqFeatures(ctx, get, log, service,describeSettings(Config))
   ctx.effect(()=>{
     let pending=false,lastPath=workspace.path,retry=migrated.deferred>0
     const timer=setInterval(()=>{if(pending)return;pending=true;void(async()=>{
