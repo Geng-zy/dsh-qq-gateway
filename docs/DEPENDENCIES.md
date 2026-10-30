@@ -1,6 +1,6 @@
 # 依赖与公开上游清单
 
-本清单随构建自动生成，来源为package.json、pnpm-lock.yaml、源码外部模块引用和scripts/build-update-catalog.mjs中的上游资源定义。不是对宿主已安装程序的检查。当前插件：dsh-qq-gateway 2.6.0。
+本清单随构建自动生成，来源为package.json、pnpm-lock.yaml、源码外部模块引用和scripts/build-update-catalog.mjs中的上游资源定义。不是对宿主已安装程序的检查。当前插件：dsh-qq-gateway 2.6.1。
 
 | 项目 | 类别 | 声明/公开快照基准（非安装证明） | 检查来源 | 用途 |
 | --- | --- | --- | --- | --- |
@@ -19,8 +19,8 @@
 | typescript | development-package | 7.0.2 | npm: typescript | 插件运行或构建/测试依赖；合并管理20项内部记录，详细归属见清单JSON，不逐项检查或提醒 |
 | ws | runtime-package | 8.22.0 | npm: ws | 插件运行或构建/测试依赖 |
 | yaml | runtime-package | 2.9.1 | npm: yaml | 插件运行或构建/测试依赖 |
-| dsh-qq-gateway正式发行 | upstream | 2.6.0 | github: Geng-zy/dsh-qq-gateway | 本插件公开正式发行；不自动下载安装 |
-| 人格记忆插件可选联动 | upstream | 2.6.0 | github: Geng-zy/dsh-persona-memory | 可选插件间事件与服务接口兼容；独立安装不要求另一个插件在场 |
+| dsh-qq-gateway正式发行 | upstream | 2.6.1 | github: Geng-zy/dsh-qq-gateway | 本插件公开正式发行；不自动下载安装 |
+| 人格记忆插件可选联动 | upstream | 2.6.1 | github: Geng-zy/dsh-persona-memory | 可选插件间事件与服务接口兼容；独立安装不要求另一个插件在场 |
 | DeepSeek Harness | upstream | 0.2.1-rc.2 | npm: @deepseek-ai/dsh | 宿主公开发行与插件SDK兼容，允许预览版；不扫描宿主安装情况；合并管理31项内部记录，详细归属见清单JSON，不逐项检查或提醒 |
 | Node.js LTS | upstream | 24.22.1 | node-lts: https://nodejs.org/dist/index.json | 插件运行/开发所需的上游最新LTS；不检测服务器安装；合并管理8项内部记录，详细归属见清单JSON，不逐项检查或提醒 |
 | Jina Reader公开网页读取后备 | service | 首次公开观测建立基准，非已适配证明 | document: https://jina.ai/reader/ | 可选公开文档读取后备服务；仅发送公开来源URL，不发送凭据、配置或业务数据 |
@@ -57,7 +57,7 @@
 | Stability AI | service | 首次公开观测建立基准，非已适配证明 | document: https://platform.stability.ai/docs/release-notes | 官方接口/模型发布与弃用资料变化；全量监测支持项，不代表已配置或实际启用 |
 | Ideogram | service | 首次公开观测建立基准，非已适配证明 | document: https://developer.ideogram.ai | 官方接口/模型发布与弃用资料变化；全量监测支持项，不代表已配置或实际启用 |
 | Hugging Face推理 | service | 首次公开观测建立基准，非已适配证明 | document: https://huggingface.co/docs/inference-providers/index | 官方接口/模型发布与弃用资料变化；全量监测支持项，不代表已配置或实际启用 |
-| Server酱 | service | 首次公开观测建立基准，非已适配证明 | document: https://sct.ftqq.com | 官方接口/模型发布与弃用资料变化；全量监测支持项，不代表已配置或实际启用 |
+| Server酱 | service | 首次公开观测建立基准，非已适配证明 | document: https://sct.ftqq.com/docs/ | 官方接口/模型发布与弃用资料变化；全量监测支持项，不代表已配置或实际启用 |
 | PushPlus | service | 首次公开观测建立基准，非已适配证明 | document: https://www.pushplus.plus/doc/guide/api.html | 官方接口/模型发布与弃用资料变化；全量监测支持项，不代表已配置或实际启用 |
 | AUTOMATIC1111 | upstream | 首次公开观测建立基准，非已适配证明 | github: AUTOMATIC1111/stable-diffusion-webui | 可选接入上游，首次仅发现正式版本，基准需按适配实际补充；不探测本机程序 |
 | Forge | upstream | 首次公开观测建立基准，非已适配证明 | github: lllyasviel/stable-diffusion-webui-forge | 可选接入上游，首次仅发现正式版本，基准需按适配实际补充；不探测本机程序 |

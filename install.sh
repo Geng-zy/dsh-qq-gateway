@@ -2,8 +2,8 @@
 # Interactive server installation; user input is read from /dev/tty, including curl | sudo bash.
 set -euo pipefail
 umask 077
-INSTALL_VERSION=2.6.0
-INSTALLER_SHA256=a304ab5c87d5e27aca5e878e84708b320a959edd150fc930674a2092f3dd07ed
+INSTALL_VERSION=2.6.1
+INSTALLER_SHA256=0232cd51c74afb509120468c28da0c56b3dbb938c5cadbce7436f82dd6585a4b
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
   cat <<'HELP'
 SnowLuma Companion 一键安装（全新Ubuntu amd64/arm64，systemd）
