@@ -141,6 +141,25 @@ export async function runUi(session) {
   console.log('[ui] Image provider presets, settings save, quota-labeled real mocked generation, preview/download and light/dark rendering passed')
   await settingsDialog.getByRole('button',{name:'人格与记忆',exact:true}).click()
   assert.equal(await app.locator('.sc-nav-item').count(),8)
+  const selectedTaskModel='deepseek-official/deepseek-flash'
+  for(const [task,category,section] of [['memory','长期记忆','companion-memGen'],['summary','上下文管理','companion-context']]){
+   await navigate(category);await openSection(section)
+   await app.locator('#companion-core-'+task+'Source').selectOption('dsh')
+   const pick=app.locator('#companion-core-'+task+'Model')
+   await pick.locator('option[value="'+selectedTaskModel+'"]').waitFor({state:'attached'})
+   await pick.selectOption(selectedTaskModel)
+   assert.equal(await pick.inputValue(),selectedTaskModel,task+' model selection updates the draft')
+  }
+  await save.click();await page.waitForFunction(()=>document.querySelector('.sc-save.sc-clean'))
+  // Reopen the host entry to verify persistence rather than just a DOM selection.
+  await settingsDialog.getByRole('button',{name:'QQ 接入助手',exact:true}).click()
+  await settingsDialog.getByRole('button',{name:'人格与记忆',exact:true}).click()
+  for(const [task,category,section] of [['memory','长期记忆','companion-memGen'],['summary','上下文管理','companion-context']]){
+   await navigate(category);await openSection(section)
+   assert.equal(await app.locator('#companion-core-'+task+'Source').inputValue(),'dsh')
+   assert.equal(await app.locator('#companion-core-'+task+'Model').inputValue(),selectedTaskModel)
+  }
+  console.log('[ui] Organizing and compression configured-model selections save and reopen correctly')
   await navigate('人格与核心记忆')
   const persona=app.locator('[data-section="companion-persona"]')
   if(!await persona.evaluate(e=>e.open))await persona.locator('summary').first().click()
