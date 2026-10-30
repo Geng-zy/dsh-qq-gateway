@@ -13,7 +13,7 @@ export declare function cleanItems(list: unknown): BackupItem[];
 export declare function configuredItems(list: unknown): BackupItem[];
 /** 包里有哪些（旧包没写就按旧版固定内容算） */
 export declare function itemsOf(m: Manifest): BackupItem[];
-/** Validated payload files grouped by the restore operation that consumes them. A DB may serve two independent table selections. */
+/** 按当前插件可恢复项目列出已校验的业务文件。 */
 export declare function restoreContents(m: Manifest): Array<{
     item: BackupItem;
     files: Array<{
@@ -112,10 +112,10 @@ export interface RestorePlan {
 }
 /**
  * 插件启动时（打开数据库之前）调用：有待导入的数据就按勾选还原。
- * 原始会话先建立新日志并切换绑定（旧日志保留），再换数据库（一个事务），再换文件夹（旧的先挪开，失败放回去），图片只补不删。
+ * 原始会话先建立新日志并切换绑定（旧日志保留），再换数据库（一个事务），最后补充缺失的存档图片。
  * 返回导入的清单和勾选（没有待导入时 undefined）。
  */
-export declare function applyPendingImport(dataDir: string, historyKeep?: () => number, sessionServices?: MasterSessionServices): Promise<{
+export declare function applyPendingImport(dataDir: string, _historyKeep?: () => number, sessionServices?: MasterSessionServices): Promise<{
     manifest: Manifest;
     plan: RestorePlan;
 } | undefined>;

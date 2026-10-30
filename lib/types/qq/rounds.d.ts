@@ -23,21 +23,3 @@ export declare function countRounds(session: SurfaceLike): number;
 export declare function pendingHumanTurn(session: SurfaceLike & {
     seq?: number;
 }): boolean;
-export interface DropRange {
-    /** 第一个要处理的节点（含） */
-    start: number;
-    /** 最后一个要处理的节点（含） */
-    end: number;
-    /** 这次处理掉几轮 */
-    rounds: number;
-}
-/**
- * 挑出最早的 drop 轮（至少留下最新的一轮），返回要截掉/压缩的节点范围。
- * 开头的系统消息不动；切口不能把工具调用和它的结果分开（balanced 判断切口是否完整）。
- * 上一次的压缩摘要在最前面，会一起被处理（LLM 压缩时合并进新摘要）。
- */
-export declare function selectRounds(session: SurfaceLike, drop: number, balanced: (seq: number) => boolean): DropRange | null;
-/** 截断时留在原处的一句话。 */
-export declare function truncationNote(rounds: number): string;
-/** LLM 压缩用的指令：中文、她的第一人称，作为最后一条用户消息接在被压缩的对话后面（能用上对话前缀的缓存）。 */
-export declare const SUMMARY_INSTRUCTION: string;

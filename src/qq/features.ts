@@ -35,7 +35,6 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
   const organizer = {
     categoryOf(umo: string, kind: string): Category { const info=snowluma()?.sessionInfoByUmo(umo); return kind==='group'?'group':info?.adminPrivate?'master':archive.cursor('cat:'+umo)===1?'master':'private' },
     rememberCategory(umo: string, category: Category) { archive.setCursor('cat:'+umo,category==='master'?1:category==='group'?3:2) },
-    onReply(_umo: string, _rounds?: number) {},
   }
   const meta = { get: (key: string): string | undefined => (archive.db.prepare('SELECT value FROM meta WHERE key=?').get(key) as {value:string}|undefined)?.value, set: (key:string,value:string) => {archive.db.prepare('INSERT INTO meta(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run(key,value)} }
   const mediaDir=join(dir,'media')
@@ -61,8 +60,7 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
   }))
   ctx.effect(() => () => imageGenerator.dispose(), 'companion: image generation')
   const clockOk = (v: string, fallback: string): string => /^\d{1,2}:\d{2}$/.test(v.trim()) ? v.trim().padStart(5, '0') : fallback
-  const proactive = archive !== undefined
-    ? new Proactive({
+  const proactive = new Proactive({
       archive, organizer, mediaDir, meta, log,
       allowed: umo => {
         const [platform_name, message_type, session_id, ...extra] = umo.split(':')
@@ -82,11 +80,10 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
         },
       }),
     })
-    : undefined
   ctx.effect(() => {
     let running = false
     const timer = setInterval(() => {
-      if (proactive === undefined || running) return
+      if (running) return
       running = true
       void proactive.tick().catch(e => log('warn', '主动聊天出错：' + errText(e))).finally(() => { running = false })
     }, 60_000)
@@ -96,7 +93,7 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
   ctx.on('snowluma/prompt' as never, (async (payload: { info: { type: string; umo: string; groupId?: string; sessionId: string }; message: any; content: any[] }) => {
     try {
       const info = payload.info
-      if (archive === undefined || info?.type !== 'group' || get('groupContextCount') <= 0) return
+      if (info?.type !== 'group' || get('groupContextCount') <= 0) return
       const s: Scope = { category: 'group', qq: true, umo: info.umo, ...(info.groupId ? { groupId: info.groupId } : {}) }
       if (!archivePolicy(s).unwoken) return
       const umo = String(info.umo)
@@ -208,7 +205,7 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
   const saveImages = async (umo: string, messageId: string, comps: any[], session: ArchiveSession): Promise<void> => {
     const allowed = (): boolean => get('archiveEnabled') && archiveAllowed(snowluma(), session)
     const media = (snowluma() as any)?.media as { loadImage?(c: any): Promise<{ mediaType: string; data: string }> } | undefined
-    if (media?.loadImage === undefined || archive === undefined) return
+    if (media?.loadImage === undefined) return
     let changed = false
     for (const c of comps) {
       if (!allowed()) return
@@ -232,7 +229,7 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
     if (changed && allowed()) archive.updateSegments(umo, messageId, JSON.stringify(comps))
   }
   const store = (m: ArchivedMessage): void => {
-    if (archive === undefined || !get('archiveEnabled')) return
+    if (!get('archiveEnabled')) return
     try {
       archive.add(m)
     } catch (e) {
@@ -247,7 +244,7 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
     const s: Scope = isGroup
       ? { category: 'group', qq: true, groupId: String(abm.raw_message?.group_id ?? abm.group?.group_id ?? abm.session_id ?? '') }
       : { category: info?.adminPrivate ? 'master' : 'private', qq: true, userId: String(abm.session_id ?? abm.sender?.user_id ?? '') }
-    if (isGroup || info !== undefined) organizer?.rememberCategory(umo, s.category)
+    if (isGroup || info !== undefined) organizer.rememberCategory(umo, s.category)
     if (isGroup && !isWake && !archivePolicy(s).unwoken) return
     const notice = abm?.raw_message?.post_type !== 'message'
     let segments: string | undefined
@@ -274,7 +271,7 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
     if (!archiveAllowed(snowluma(), p.session)) return
     const isGroup = p.session?.message_type === 'GroupMessage'
     const info = (snowluma() as any)?.sessionInfoByUmo?.(p.umo) as { sessionId?: string; selfId?: string; type?: string; adminPrivate?: boolean } | undefined
-    if (info !== undefined) organizer?.rememberCategory(p.umo, info.type === 'group' ? 'group' : info.adminPrivate ? 'master' : 'private')
+    if (info !== undefined) organizer.rememberCategory(p.umo, info.type === 'group' ? 'group' : info.adminPrivate ? 'master' : 'private')
     store({
       umo: p.umo, kind: isGroup ? 'group' : 'private',
       ...(isGroup ? { groupId: p.session.session_id } : { userId: p.session.session_id }),
@@ -310,7 +307,6 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
     if(ops.length)await svc.mutate(f.ns,ops);return ['QQ插件设置已恢复；密钥保持原值']
   }
   const backupNow = async (reason: 'auto' | 'manual' | 'before-import', items?: readonly BackupItem[]) => {
-    if (archive === undefined) throw new Error('数据库没打开')
     const es = {model:''}
     const dim = Number(meta.get('embed_dim:' + es.model.trim()) ?? NaN)
     // 导入前的备份什么都带上，万一要退回去
@@ -325,7 +321,7 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
   }
   ctx.effect(() => {
     const timer = setInterval(() => {
-      if (!get('backupEnabled') || archive === undefined) return
+      if (!get('backupEnabled')) return
       const now = Date.now()
       const day = logicalDay(now, 0, get('timezone'))
       if (meta.get('backup:day') === day || localClock(now, get('timezone')) < clockOk(get('backupTime'), '04:00')) return
@@ -346,7 +342,7 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
     req.on('end', () => { try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf-8') || '{}')) } catch (e) { reject(e) } })
     req.on('error', reject)
   })
-  const state = () => ({dataDir:dir,snowluma:true,docs:{},archive:archive.stats(),retired:archive.retiredList(),maintenance:retention.last??null,proactive:{list:proactive?.list()??[],wakeAvailable:true},backups:listBackups(backupsDir),backupRetention:{keep:get('backupKeep'),scope:'all'},backupItemsAll:ITEMS,lastImport,importing:pendingInspect?{id:pendingInspect.id,manifest:pendingInspect.manifest,items:itemsOf(pendingInspect.manifest),contents:restoreContents(pendingInspect.manifest)}:null,logs})
+  const state = () => ({dataDir:dir,snowluma:true,docs:{},archive:archive.stats(),retired:archive.retiredList(),maintenance:retention.last??null,proactive:{list:proactive.list(),wakeAvailable:true},backups:listBackups(backupsDir),backupRetention:{keep:get('backupKeep'),scope:'all'},backupItemsAll:ITEMS,lastImport,importing:pendingInspect?{id:pendingInspect.id,manifest:pendingInspect.manifest,items:itemsOf(pendingInspect.manifest),contents:restoreContents(pendingInspect.manifest)}:null,logs})
   ctx.on('connection/request' as never, (async (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse, next: () => Promise<void>) => {
     const path = new URL(req.url ?? '/', 'http://localhost').pathname
     const at = path.indexOf('/qq-gateway/')
@@ -419,14 +415,14 @@ export async function applyQqFeatures(ctx: Context, get: <K extends keyof Config
         if (req.method !== 'POST') return json(405, { error: '只支持 POST' })
         if (!String(req.headers['content-type'] ?? '').includes('application/json')) return json(415, { error: '需要 application/json' })
         const body = await readBody(req)
-        const target = proactive?.scopeForUmo(String(body?.umo ?? ''))
-        if (proactive === undefined || target === undefined) return json(404, { error: '没有这个会话' })
+        const target = proactive.scopeForUmo(String(body?.umo ?? ''))
+        if (target === undefined) return json(404, { error: '没有这个会话' })
         const ok = await proactive.fire(String(body.umo), target)
         return ok ? json(200, state()) : json(500, { error: '唤醒失败，看日志' })
       }
       if (parts[0] === 'proactive' && parts[1] === 'tick' && process.env.COMPANION_TEST_CLOCK === '1') {
         const body = await readBody(req)
-        const woken = await proactive?.tick(typeof body?.now === 'number' ? body.now : Date.now())
+        const woken = await proactive.tick(typeof body?.now === 'number' ? body.now : Date.now())
         return json(200, { woken: woken ?? [] })
       }
       if (parts[0] === 'backup') {

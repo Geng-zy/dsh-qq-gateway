@@ -14,8 +14,8 @@
 适用于 dsh **0.2.1-rc.2**、Node **≥22.13**。先等待正在回复或生图的任务完成，停止 dsh；以运行 dsh 的同一系统账号和相同 `DSH_HOME` 执行：
 
 ```sh
-dsh plugin --profile web add "https://github.com/Geng-zy/dsh-qq-gateway/releases/download/v2.7.1/dsh-qq-gateway-2.7.1.tgz" --ignore-scripts
-dsh plugin --profile web add "https://github.com/Geng-zy/dsh-persona-memory/releases/download/v2.7.1/dsh-persona-memory-2.7.1.tgz" --ignore-scripts
+dsh plugin --profile web add "https://github.com/Geng-zy/dsh-qq-gateway/releases/download/v2.7.2/dsh-qq-gateway-2.7.2.tgz" --ignore-scripts
+dsh plugin --profile web add "https://github.com/Geng-zy/dsh-persona-memory/releases/download/v2.7.2/dsh-persona-memory-2.7.2.tgz" --ignore-scripts
 ```
 
 可以只执行其中一条。只装QQ插件使用dsh默认人格；只装人格插件默认等待QQ接入，也可将“会话生效范围”改为全部会话。两者共同安装时QQ新会话采用陪伴预设。插件不会自动修改普通网页会话的全局默认预设。
@@ -24,7 +24,7 @@ dsh plugin --profile web add "https://github.com/Geng-zy/dsh-persona-memory/rele
 
 **已有旧版统一插件时不要直接叠加安装。** 请先按[拆分迁移说明](docs/SPLIT-MIGRATION.md)迁移配置和数据；保留原QQ历史，校验复制后才归档原会话。
 
-[插件安装详细说明](docs/PLUGIN-INSTALL.md) · [发行页](https://github.com/Geng-zy/dsh-qq-gateway/releases/tag/v2.7.1)
+[插件安装详细说明](docs/PLUGIN-INSTALL.md) · [发行页](https://github.com/Geng-zy/dsh-qq-gateway/releases/tag/v2.7.2)
 
 ## 新服务器部署
 
@@ -96,3 +96,5 @@ pnpm test
 在设置的“开发者选项 → 依赖与上游更新”中启用，默认关闭。启用后默认每7天检查，两个插件各自配置邮件/微信、各自通知，不巡检宿主或自动升级。覆盖完整依赖、上游代码/资源及对接服务，并可用独立模型生成脱敏更新交接文档。
 
 [使用与隐私说明](docs/UPDATES.md) · [完整依赖清单](docs/DEPENDENCIES.md) · [机器可读清单](docs/DEPENDENCIES.json)
+
+维护审查：[代码精简与功能重叠审查](docs/CODE-AUDIT.md)（v2.7.2，运行状态以部署记录为准）。

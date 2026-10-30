@@ -5,7 +5,7 @@
 import { readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { isAbsolute, resolve as resolvePath } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { fileURLToPath } from 'node:url'
 
 export type ComponentType =
   | 'Plain' | 'Image' | 'Record' | 'Video' | 'File'
@@ -218,12 +218,6 @@ export async function toDictAsync(comp: Component): Promise<Record<string, any>>
     default:
       return toDict(comp)
   }
-}
-
-/** pathlib.Path(x).is_absolute() 且不含 :// 时转 file: URI（AiocqhttpMessageEvent._from_segment_to_dict）。 */
-export function toFileUri(value: string): string {
-  if (isAbsolute(value) && !value.includes('://')) return pathToFileURL(value).href
-  return value
 }
 
 /** MessageChain：AstrBot 的消息链只是组件列表。 */

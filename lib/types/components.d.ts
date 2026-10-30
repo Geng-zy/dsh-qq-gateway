@@ -28,8 +28,6 @@ export declare function toDict(comp: Component): Record<string, any>;
 export declare function convertToBase64(comp: Component): Promise<string>;
 /** BaseMessageComponent.to_dict（异步版）及 File/Video/Node/Nodes 的覆盖。 */
 export declare function toDictAsync(comp: Component): Promise<Record<string, any>>;
-/** pathlib.Path(x).is_absolute() 且不含 :// 时转 file: URI（AiocqhttpMessageEvent._from_segment_to_dict）。 */
-export declare function toFileUri(value: string): string;
 /** MessageChain：AstrBot 的消息链只是组件列表。 */
 export interface MessageChain {
     chain: Component[];
