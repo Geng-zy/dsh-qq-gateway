@@ -26,9 +26,11 @@ export async function runUi(session) {
   assert.equal(await app.locator('.sc-nav-item').count(),9,'QQ UI: '+await app.innerText())
   assert.equal(await app.getByText('人格与核心记忆',{exact:true}).count(),0,'QQ页面不包含人格设置')
   const navigate=async title=>{await app.locator('.sc-nav-item').filter({hasText:title}).click();await page.waitForTimeout(80)}
+  const initialPanelWidth=(await app.boundingBox()).width
   const openSection=async id=>{const section=app.locator('[data-section="'+id+'"]');if(!await section.evaluate(e=>e.open))await section.locator(':scope > summary').click();await page.waitForFunction(id=>document.querySelector('[data-section="'+id+'"]')?.open,id);assert.equal(await app.locator('.sc-section[open]').count(),1,'only one category may be open');return section}
   const collapse=async()=>{await app.getByRole('button',{name:'全部收起',exact:true}).click();await page.waitForFunction(()=>[...document.querySelectorAll('.sc-section:not([hidden])')].every(e=>!e.open))}
   await navigate('开发者选项');const updates=await openSection('developer-updates')
+  assert.ok(Math.abs((await app.boundingBox()).width-initialPanelWidth)<2,'panel width must remain stable between categories')
   assert.equal(await updates.getByRole('switch',{name:'启用更新提醒',exact:true}).isChecked(),false)
   assert.equal(await updates.getByRole('button',{name:'立即检查',exact:true}).isDisabled(),true)
   await updates.getByRole('tab',{name:'报告模型',exact:true}).click()
@@ -174,7 +176,9 @@ export async function runUi(session) {
   assert.equal(await editor.inputValue(),imported,'filtering does not rewrite the draft')
   const externalText='# 服务器新版\n来自另一个编辑器的修改。'
   await post('doc/persona',{text:externalText,revision:originalDoc.revision})
-  await persona.locator('.sc-persona-status').getByRole('button',{name:'刷新',exact:true}).click()
+  const personaStatus=persona.locator('.sc-persona-status')
+  if(!await personaStatus.evaluate(el=>el.open))await personaStatus.locator(':scope > summary').click()
+  await personaStatus.getByRole('button',{name:'刷新',exact:true}).click()
   await doc.getByText('服务器文档已更新。请先导出草稿，再载入服务器版本并合并，避免覆盖其他修改。',{exact:true}).waitFor()
   assert.ok(await doc.getByRole('button',{name:'保存人格',exact:true}).isDisabled())
   assert.equal((await state()).docs.persona.text,externalText,'a stale editor cannot overwrite the server document')
@@ -266,6 +270,31 @@ export async function runUi(session) {
   assert.equal(await selfcheck.locator('.sc-selfcheck-memory').count(),checked.found.length,'show all returned candidates, not just the first match')
   await selfcheck.locator('.sc-selfcheck-query').screenshot({path:join(artifacts,'migration-selfcheck.png')})
   console.log('[ui] Migration self-check shows all candidate excerpts with date headings and body, record IDs and retrieval-only labels')
+  if(process.env.UI_AUDIT==='1'){
+   let categories=0,cards=0
+   for(const [plugin,title] of [['qq','QQ 接入助手'],['persona','人格与记忆']]){
+    await settingsDialog.getByRole('button',{name:title,exact:true}).click()
+    const count=await app.locator('.sc-nav-item').count()
+    for(let n=0;n<count;n++){
+     await app.locator('.sc-nav-item').nth(n).click();categories++
+     const ids=await app.locator('.sc-section:not([hidden])').evaluateAll(es=>es.map(e=>e.dataset.section))
+     for(const id of ids){
+      const card=await openSection(id);cards++
+      await card.evaluate(e=>e.scrollIntoView({block:'start'}))
+      await page.screenshot({path:join(artifacts,'audit-'+plugin+'-'+id+'-top.png')})
+      // Exercise nested options and inspect the lower portion, including long forms.
+      const fold=card.locator('.sc-section-body details').first()
+      if(await fold.count()&&!await fold.evaluate(e=>e.open))await fold.locator(':scope > summary').click()
+      await card.locator('.sc-section-body').hover({position:{x:20,y:20}})
+      await page.mouse.wheel(0,500)
+      await card.locator('.sc-section-body').evaluate(e=>e.lastElementChild?.scrollIntoView({block:'end'}))
+      await page.screenshot({path:join(artifacts,'audit-'+plugin+'-'+id+'-bottom.png')})
+      assert.ok(await app.evaluate(e=>e.scrollWidth<=e.clientWidth+2),'desktop overflow: '+id)
+     }
+    }
+   }
+   console.log('[ui-audit] Inspected '+categories+' categories and '+cards+' cards, including nested options and lower content')
+  }
   assert.deepEqual(errors,[])
   console.log('[ui] Two independent entries, QQ/persona groups, single-open accordion, independent saves, cross-plugin drafts, restore and mobile rendering passed')
  } catch(error){if(debugPage){console.log('[ui-debug-footer]',await debugPage.locator('.sc-save').allTextContents());console.log('[ui-debug-alerts]',await debugPage.locator('[role=alert]').allTextContents());await debugPage.screenshot({path:join(artifacts,'failure.png'),fullPage:true}).catch(()=>{})}throw error} finally {await browser.close()}
